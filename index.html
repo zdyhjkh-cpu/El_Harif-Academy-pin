@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>أكاديمية الحريف لكرة القدم — تسجيل اللاعبين</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a130e;
+    --card: #0f2118;
+    --card-2: #122a1e;
+    --line: rgba(234,255,240,0.07);
+    --text: #eaf6ee;
+    --text-muted: #8fab9c;
+    --text-faint: #5f7d6d;
+    --green: #45d483;
+    --green-dim: #2c8a5a;
+    --gold: #f0b64c;
+    --danger: #ef6a6a;
+    --radius: 18px;
+    --font-head: 'Cairo', 'Segoe UI', sans-serif;
+    --font-body: 'Tajawal', 'Segoe UI', sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html{ scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after{ box-sizing: inherit; }
+  html, body{ height: 100%; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+
+  /* ---------- pitch background ---------- */
+  .pitch{
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(60% 50% at 50% 8%, rgba(69,212,131,0.10), transparent 60%),
+      linear-gradient(180deg, #0b160f 0%, #0a130e 55%, #08110c 100%);
+    overflow: hidden;
+  }
+  .pitch svg{
+    position: absolute;
+    top: 50%; left: 50%;
+    width: min(900px, 160vw);
+    height: auto;
+    transform: translate(-50%, -50%);
+    opacity: 0.55;
+  }
+  .pitch .stripe{
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,0.012) 0px,
+      rgba(255,255,255,0.012) 90px,
+      transparent 90px,
+      transparent 180px
+    );
+  }
+
+  .wrap{
+    position: relative;
+    z-index: 1;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 44px 20px 60px;
+  }
+
+  /* ---------- hero ---------- */
+  .badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 22px;
+  }
+  .badge .dot{
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px 1px rgba(69,212,131,0.7);
+  }
+
+  h1{
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: clamp(28px, 6.5vw, 42px);
+    line-height: 1.25;
+    text-align: center;
+    margin: 0 0 14px;
+    max-width: 15ch;
+  }
+  .sub{
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 15.5px;
+    line-height: 1.8;
+    max-width: 42ch;
+    margin: 0 0 36px;
+  }
+
+  /* ---------- glow card ---------- */
+  .glow-frame{
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    border-radius: calc(var(--radius) + 2px);
+    padding: 1.5px;
+    background: conic-gradient(from var(--rot, 0deg),
+      transparent 0deg, var(--green) 40deg, transparent 110deg,
+      transparent 210deg, var(--gold) 250deg, transparent 320deg, transparent 360deg);
+    animation: spin 7s linear infinite;
+  }
+  @keyframes spin{ to{ --rot: 360deg; } }
+  @property --rot{
+    syntax: '<angle>';
+    inherits: true;
+    initial-value: 0deg;
+  }
+
+  .card{
+    position: relative;
+    background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+    border-radius: var(--radius);
+    padding: 30px 24px 26px;
+  }
+
+  .field{ margin-bottom: 18px; }
+  .field label{
+    display: block;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .field input,
+  .field select{
+    width: 100%;
+    appearance: none;
+    background: #0a1811;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15.5px;
+    padding: 13px 14px;
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  .field select{
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' stroke='%238fab9c' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: left 14px center;
+    padding-left: 34px;
+  }
+  .field input::placeholder{ color: var(--text-faint); }
+  .field input:focus,
+  .field select:focus{
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(69,212,131,0.14);
+  }
+  .field.invalid input,
+  .field.invalid select{ border-color: var(--danger); }
+  .err{
+    display: none;
+    font-size: 12.5px;
+    color: var(--danger);
+    margin-top: 6px;
+  }
+  .field.invalid .err{ display: block; }
+
+  .send-btn{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 16px;
+    border-radius: 13px;
+    border: 1.5px solid var(--green-dim);
+    background: linear-gradient(180deg, #1c7a4c 0%, #145c39 100%);
+    color: #eafff2;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: transform .12s ease, filter .12s ease;
+  }
+  .send-btn:active{ transform: scale(0.97); }
+  .send-btn:disabled{ opacity: 1; cursor: default; }
+  .send-btn:not(:disabled):hover{ filter: brightness(1.08); }
+
+  .btn-icon{
+    position: relative;
+    width: 21px; height: 21px;
+    flex-shrink: 0;
+  }
+  .btn-icon svg{
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    transform: scale(0.5) rotate(-25deg);
+    transition: opacity .22s ease, transform .32s cubic-bezier(.34,1.56,.64,1);
+  }
+  .btn-icon svg.active{
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  .send-btn.loading .btn-icon svg.icon-plane.active{
+    animation: plane-fly 1.05s ease-in-out infinite;
+  }
+  @keyframes plane-fly{
+    0%{ transform: translate(0,0) rotate(0deg); }
+    50%{ transform: translate(3px,-3px) rotate(10deg); }
+    100%{ transform: translate(0,0) rotate(0deg); }
+  }
+  .icon-check{ stroke-dasharray: 26; stroke-dashoffset: 26; }
+  .send-btn.success .icon-check.active{
+    animation: draw-check .45s ease forwards .05s;
+  }
+  @keyframes draw-check{ to{ stroke-dashoffset: 0; } }
+
+  .send-btn.loading{
+    border-color: var(--green);
+    cursor: default;
+  }
+  .send-btn.success{
+    border-color: var(--green);
+    background: linear-gradient(180deg, #16603f 0%, #0f4630 100%);
+    cursor: default;
+  }
+
+  .status-line{
+    min-height: 18px;
+    margin: 10px 2px 0;
+    font-size: 12.5px;
+    color: var(--text-faint);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .status-line.show{ opacity: 1; transform: translateY(0); }
+  .status-line.ok{ color: var(--green); }
+  .status-line.bad{ color: var(--danger); }
+
+  .toast{
+    position: fixed;
+    left: 50%;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%) translateY(20px);
+    background: #0f2118;
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 20;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .note{
+    margin-top: 22px;
+    max-width: 420px;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 12.5px;
+    line-height: 1.9;
+  }
+  .note b{ color: var(--text-muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="pitch">
+  <div class="stripe"></div>
+  <svg viewBox="0 0 400 600" fill="none">
+    <rect x="20" y="10" width="360" height="580" rx="4" stroke="#eaf6ee" stroke-opacity="0.5"/>
+    <line x1="20" y1="300" x2="380" y2="300" stroke="#eaf6ee" stroke-opacity="0.5"/>
+    <circle cx="200" cy="300" r="55" stroke="#eaf6ee" stroke-opacity="0.5"/>
+    <circle cx="200" cy="300" r="2.5" fill="#eaf6ee" fill-opacity="0.5"/>
+    <path d="M110 10 v70 a90 90 0 0 0 180 0 v-70" stroke="#eaf6ee" stroke-opacity="0.5"/>
+    <path d="M110 590 v-70 a90 90 0 0 1 180 0 v70" stroke="#eaf6ee" stroke-opacity="0.5"/>
+  </svg>
+</div>
+
+<div class="wrap">
+  <div class="badge"><span class="dot"></span> التسجيل مفتوح لهذا الموسم</div>
+
+  <h1>انضم لتشكيلة أكاديمية الحريف</h1>
+  <p class="sub">سجّل بياناتك واختر مركزك في الملعب، وسيتواصل معك المدرب لتأكيد مكانك في التدريبات.</p>
+
+  <div class="glow-frame">
+    <div class="card">
+      <div class="field" id="f-name">
+        <label for="name">الاسم بالكامل</label>
+        <input id="name" type="text" placeholder="مثال: أحمد محمود">
+        <div class="err">اكتب الاسم كاملاً</div>
+      </div>
+
+      <div class="field" id="f-age">
+        <label for="age">العمر</label>
+        <input id="age" type="number" inputmode="numeric" placeholder="مثال: 14" min="5" max="60">
+        <div class="err">أدخل عمرًا صحيحًا بين 5 و60</div>
+      </div>
+
+      <div class="field" id="f-pos">
+        <label for="pos">المركز في الملعب</label>
+        <select id="pos">
+          <option value="" selected disabled>اختر المركز</option>
+          <option>حارس مرمى</option>
+          <option>مدافع</option>
+          <option>وسط ميدان</option>
+          <option>مهاجم</option>
+        </select>
+        <div class="err">اختر المركز المناسب</div>
+      </div>
+
+      <button class="send-btn" id="sendBtn">
+        <span class="btn-icon" id="btnIcon">
+          <svg class="icon-whatsapp active" viewBox="0 0 24 24" fill="#eafff2"><path d="M12.02 2C6.5 2 2.04 6.46 2.04 12c0 1.77.46 3.45 1.34 4.94L2 22l5.2-1.36a9.9 9.9 0 0 0 4.82 1.23h.01c5.52 0 9.98-4.46 9.98-10S17.55 2 12.02 2zm5.86 14.25c-.25.7-1.24 1.28-2.02 1.44-.55.11-1.26.2-3.65-.78-3.06-1.27-5.03-4.38-5.18-4.58-.15-.2-1.24-1.65-1.24-3.15s.78-2.24 1.06-2.54c.28-.3.6-.38.8-.38h.58c.19 0 .44-.03.68.53.25.6.85 2.08.92 2.23.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.18-.31.4-.44.53-.15.15-.3.31-.13.6.17.3.76 1.28 1.65 2.08 1.14 1.03 2.09 1.35 2.39 1.5.3.15.47.13.65-.08.18-.2.75-.87.95-1.17.2-.3.4-.25.66-.15.27.1 1.72.83 2.01.98.3.15.49.23.56.35.08.13.08.72-.17 1.42z"/></svg>
+          <svg class="icon-plane" viewBox="0 0 24 24" fill="none" stroke="#eafff2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7.5 2.5L15 20.5 21 3z"/><path d="M10.5 13 21 3"/></svg>
+          <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="#7bffb0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6"/></svg>
+        </span>
+        <span class="btn-text" id="btnText">إرسال بياناتي عبر واتساب</span>
+      </button>
+      <p class="status-line" id="statusLine"></p>
+    </div>
+  </div>
+
+  <p class="note">بياناتك بتتبعت تلقائيًا لواتساب المدرب من غير ما تفتح أي تطبيق.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const COACH_PHONE_LOCAL = "01027944588"; // مصر
+  const COACH_PHONE_INTL  = "20" + COACH_PHONE_LOCAL.replace(/^0/, "");
+
+  // ============ إعداد الإرسال التلقائي لواتساب ============
+  // CallMeBot بيبعت الرسالة تلقائيًا بدون فتح أي تطبيق.
+  // لازم تفعّل رقم المدرب الجديد مع CallMeBot وتحط الـ apikey الجديد هنا
+  // (الخطوات في رسالة الشرح). لحد ما تحط apikey صحيح، الموقع هيستخدم
+  // تلقائيًا الطريقة البديلة (فتح واتساب برسالة جاهزة للمدرب).
+  const CALLMEBOT_PHONE   = COACH_PHONE_INTL; // نفس رقم المدرب بالصيغة الدولية
+  const CALLMEBOT_APIKEY  = "6066592";
+  // =====================================================
+
+  const fields = {
+    name: document.getElementById('name'),
+    age:  document.getElementById('age'),
+    pos:  document.getElementById('pos'),
+  };
+  const wrappers = {
+    name: document.getElementById('f-name'),
+    age:  document.getElementById('f-age'),
+    pos:  document.getElementById('f-pos'),
+  };
+
+  function validate(){
+    let ok = true;
+
+    if (!fields.name.value.trim()){
+      wrappers.name.classList.add('invalid'); ok = false;
+    } else wrappers.name.classList.remove('invalid');
+
+    const ageNum = Number(fields.age.value);
+    if (!fields.age.value || ageNum < 5 || ageNum > 60){
+      wrappers.age.classList.add('invalid'); ok = false;
+    } else wrappers.age.classList.remove('invalid');
+
+    if (!fields.pos.value){
+      wrappers.pos.classList.add('invalid'); ok = false;
+    } else wrappers.pos.classList.remove('invalid');
+
+    return ok;
+  }
+
+  ['input','change'].forEach(evt=>{
+    fields.name.addEventListener(evt, ()=> wrappers.name.classList.remove('invalid'));
+    fields.age.addEventListener(evt, ()=> wrappers.age.classList.remove('invalid'));
+    fields.pos.addEventListener(evt, ()=> wrappers.pos.classList.remove('invalid'));
+  });
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._h);
+    showToast._h = setTimeout(()=> t.classList.remove('show'), 2600);
+  }
+
+  function buildMessage(){
+    const name = fields.name.value.trim();
+    const age  = fields.age.value.trim();
+    const pos  = fields.pos.value;
+    return `طالب جديد بأكاديمية الحريف\nالاسم: ${name}\nالعمر: ${age}\nالمركز: ${pos}`;
+  }
+
+  const sendBtn   = document.getElementById('sendBtn');
+  const btnIcon   = document.getElementById('btnIcon');
+  const btnText   = document.getElementById('btnText');
+  const statusLine= document.getElementById('statusLine');
+  const iconWhatsapp = btnIcon.querySelector('.icon-whatsapp');
+  const iconPlane     = btnIcon.querySelector('.icon-plane');
+  const iconCheck      = btnIcon.querySelector('.icon-check');
+  const IDLE_LABEL = 'إرسال بياناتي عبر واتساب';
+
+  function setIcon(active){
+    [iconWhatsapp, iconPlane, iconCheck].forEach(i => i.classList.toggle('active', i === active));
+  }
+
+  function setStatus(msg, kind){
+    statusLine.textContent = msg;
+    statusLine.classList.remove('ok','bad');
+    if (kind) statusLine.classList.add(kind);
+    statusLine.classList.toggle('show', !!msg);
+  }
+
+  function resetButton(clearForm){
+    sendBtn.classList.remove('loading','success');
+    sendBtn.disabled = false;
+    setIcon(iconWhatsapp);
+    btnText.textContent = IDLE_LABEL;
+    setStatus('');
+    if (clearForm){
+      fields.name.value = '';
+      fields.age.value  = '';
+      fields.pos.value  = '';
+    }
+  }
+
+  const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+  const callMeBotReady = CALLMEBOT_APIKEY.indexOf('PASTE_') !== 0;
+
+  sendBtn.addEventListener('click', async ()=>{
+    if (sendBtn.disabled) return;
+    if (!validate()){
+      showToast('أكمل البيانات المطلوبة أولاً');
+      return;
+    }
+    const text = buildMessage();
+
+    if (!callMeBotReady){
+      // لسه مفيش apikey — بديل شغال: فتح واتساب برسالة جاهزة
+      window.open(`https://wa.me/${COACH_PHONE_INTL}?text=${encodeURIComponent(text)}`, '_blank');
+      showToast('واتساب جاهز — اضغط إرسال هناك');
+      return;
+    }
+
+    // ---- مرحلة الإرسال: تتحول الأيقونة لطائرة ورقية وتدور ----
+    sendBtn.classList.remove('success');
+    sendBtn.classList.add('loading');
+    sendBtn.disabled = true;
+    setIcon(iconPlane);
+    btnText.textContent = 'جاري الإرسال...';
+    setStatus('بنبعت بياناتك للمدرب...');
+
+    try{
+      await Promise.all([
+        fetch(`https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(CALLMEBOT_PHONE)}&text=${encodeURIComponent(text)}&apikey=${CALLMEBOT_APIKEY}`, { mode: 'no-cors' }),
+        wait(900) // نضمن ظهور حالة "جاري الإرسال" شوية حتى لو الشبكة سريعة
+      ]);
+
+      // ---- مرحلة النجاح: علامة صح + رسالة تأكيد ----
+      sendBtn.classList.remove('loading');
+      sendBtn.classList.add('success');
+      setIcon(iconCheck);
+      btnText.textContent = 'تم الإرسال';
+      setStatus('وصلت بياناتك للمدرب على واتساب ✅ هيتواصل معاك قريبًا', 'ok');
+
+      // ---- رجوع الزرار لوضعه الأول تلقائيًا بعد شوية ----
+      await wait(2600);
+      resetButton(true);
+
+    }catch(e){
+      sendBtn.classList.remove('loading','success');
+      sendBtn.disabled = false;
+      setIcon(iconWhatsapp);
+      btnText.textContent = IDLE_LABEL;
+      setStatus('تعذّر الإرسال، تأكد من الاتصال بالإنترنت', 'bad');
+    }
+  });
+</script>
+
+</body>
+</html>
